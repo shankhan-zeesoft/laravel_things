@@ -1,0 +1,32 @@
+To create a monthly cron job in Laravel, you can follow these steps:
+
+Create a new command using the make:command Artisan command. From your terminal, run the following command:
+
+php artisan make:command {commandName}
+Replace {commandName} with the name of the command you want to create. This will generate a new PHP file in the /app/Console/Commands directory.
+
+Open the newly created Command class and implement the handle() method. This is where you put the logic that you want to execute when the command runs.
+
+For example, if you want to send an email to all users once a month, you can write something like this:
+
+php
+public function handle()
+{
+    $users = User::all();
+
+    foreach ($users as $user) {
+        Mail::to($user->email)->send(new MonthlyEmail());
+    }
+}
+Register the command in the Console/Kernel.php file by adding it to the $commands array. For example:
+
+php
+protected $commands = [
+    \App\Console\Commands\SendMonthlyEmails::class,
+];
+Add a new entry to your server's crontab file to schedule the command to run once a month. For example:
+
+0 0 1 * * cd /path/to/your/laravel/app && php artisan send:monthly-emails >> /dev/null 2>&1
+This will run the send:monthly-emails command at midnight on the first day of each month. Modify the cd command to point to the directory containing your Laravel application.
+
+That's it! Your Laravel application will now automatically execute the send:monthly-emails command once a month.
