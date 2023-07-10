@@ -1,0 +1,43 @@
+To create a monthly-based cron job in Laravel, you can follow these steps:
+
+Open your Laravel project and navigate to the app/Console/Kernel.php file.
+
+In the Kernel.php file, locate the $commands array and add a new command to it. For example, let's say you want to create a command that sends an email on the first day of every month. You could create a new command called SendMonthlyEmail like this:
+
+php
+protected $commands = [
+    Commands\SendMonthlyEmail::class,
+];
+Create the SendMonthlyEmail command by running the following console command from your Laravel project root directory:
+bash
+php artisan make:command SendMonthlyEmail
+This will create a new PHP class file in the app/Console/Commands directory named SendMonthlyEmail.php.
+
+Open the SendMonthlyEmail.php file and update the handle method with your desired logic. For example, if you want to send an email using Laravel's built-in Mail facade, you could add the following code:
+
+php
+public function handle()
+{
+    $users = User::all(); // get all users
+    foreach ($users as $user) {
+        Mail::to($user->email)->send(new MonthlyEmail()); // send email
+    }
+}
+Register the command schedule in the schedule method in Kernel.php. Add the following code:
+php
+protected function schedule(Schedule $schedule)
+{
+    $schedule->command('email:send-monthly')->monthlyOn(1, '00:00');
+}
+This will run the SendMonthlyEmail command at 12:00 AM (UTC) on the first day of every month.
+
+Finally, to start the scheduler, you need to add a cron entry to your server. Run the following command:
+bash
+crontab -e
+This will open the crontab file for editing. Add the following line to it:
+
+bash
+* * * * * php /path/to/your/laravel/project/artisan schedule:run >> /dev/null 2>&1
+This will run the Laravel scheduler every minute, which in turn will execute the SendMonthlyEmail command at the specified time and frequency.
+
+That's it! Your monthly-based cron job is now set up and ready to go
